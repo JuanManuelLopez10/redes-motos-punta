@@ -1,0 +1,2 @@
+Poné acá las fotos, carruseles y reels del feed.
+Nombres: "DD-MM HH-MM" (foto/reel) o "DD-MM HH-MM N" (carrusel). Caption en "DD-MM HH-MM.txt".

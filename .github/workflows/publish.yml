@@ -1,0 +1,50 @@
+name: Publicar en Instagram y Facebook
+
+# Corre periódicamente y publica el contenido cuya hora ya llegó.
+# También se puede disparar a mano desde la pestaña "Actions".
+on:
+  schedule:
+    # Cada 15 minutos. OJO: el cron de GitHub Actions no es exacto; puede
+    # demorarse varios minutos (a veces 10-15) en horarios de mucha carga.
+    # Las publicaciones salen "a partir de" la hora del nombre, no al minuto justo.
+    - cron: "*/15 * * * *"
+  workflow_dispatch: {}
+
+# Necesario para que el workflow pueda hacer commit/push de los movimientos a Subidas/
+permissions:
+  contents: write
+
+# Evita que dos corridas se pisen (importante: previene publicaciones duplicadas).
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar el repo
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Configurar git
+        run: |
+          git config user.name  "motos-punta-bot"
+          git config user.email "bot@users.noreply.github.com"
+
+      - name: Publicar lo que esté listo
+        env:
+          META_ACCESS_TOKEN: ${{ secrets.META_ACCESS_TOKEN }}
+          IG_USER_ID:        ${{ secrets.IG_USER_ID }}
+          FB_PAGE_ID:        ${{ secrets.FB_PAGE_ID }}
+          PUBLISH_TO_IG:     "1"
+          PUBLISH_TO_FB:     "1"
+          GIT_COMMIT:        "1"
+        run: python publish.py
